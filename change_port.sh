@@ -1,24 +1,30 @@
 #!/bin/bash
 
+# Color
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+PURPLE='\033[0;35m'
+NC='\033[0m' # No Color
+
 # Clearing promt after run this script.
 clear
-printf "
+printf "${PURPLE}
 #######################################################################
 #                   Tools For Change Port SSH                         #
 #######################################################################
-"
+${NC}"
 echo -e "\n"
 
 # Check if user is root
-[ $(id -u) != "0" ] && { echo "Error: You must be root to run this script. \nScript Will exit in 5 Seconds\n"; sleep 5; exit 1; }
-
+[ $(id -u) != "0" ] && { echo -e "${RED}Error: You must be root to run this script.${NC} \nScript Will exit in 5 Seconds\n"; sleep 5; exit 1; }
 
 # Get OS Version and Play
 play(){
     if [ -e "/etc/os-release" ]; then
     . /etc/os-release
     else
-        echo "/etc/os-release does not exist!"
+        echo "${RED}/etc/os-release does not exist!${NC}"
         kill -9 $$; exit 1;
     fi
 
@@ -29,7 +35,7 @@ play(){
         if [[ "${Platform}" =~ ^centos$ ]] && [ "${VERSION_ID}" == '8' ]; then
             sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
             sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
-            echo -e "\n\nWe'll check update on your OS and Install some utilities\n"
+            echo -e "\n\n${GREEN}We'll check update on your OS and Install some utilities${NC}\n"
             yum check-update
             yum install policycoreutils-python-utils -y
             echo -e "=====> changing port you want <=====\n"
@@ -50,7 +56,7 @@ play(){
         echo -e "=====>      please wait       <=====\n"    
         change_port
     else
-        echo -e "\nSorry, Script does not support this OS."
+        echo -e "\n${RED}Sorry, Script does not support this OS.${NC}"
         kill -9 $$; exit 1;
     fi
 }
@@ -61,12 +67,12 @@ change_port(){
     cp /etc/ssh/sshd_config /etc/ssh/sshd_config.inst.bckup.$NOW
     # Apply changes to sshd_config
     sed -i -e "s/#Port .*/Port $portbewant/g" /etc/ssh/sshd_config
-    echo -e "\nRestarting SSH in 5 seconds. Please wait.\n"
+    echo -e "\nRestarting SSH service in 5 seconds. Please wait.\n"
     sleep 5
     # Restart SSH service
     service sshd restart
     echo ""
-    echo -e "The SSH port has been changed to $portbewant. \nPlease login using that port to test BEFORE ending this session.\n"
+    echo -e "${GREEN}The SSH port has been changed to $portbewant.${NC} \n${YELLOW}Please login using that port to test BEFORE ending this session.${NC}\n"
     exit 1
 }
 
@@ -77,8 +83,8 @@ if [[ "$portbewant" =~ ^[0-9]{2,5} || "$portbewant" == 22 ]]; then
     if [[ "$portbewant" -ge 1024 && "$portbewant" -le 65535 || "$portbewant" == 22 ]]; then
         play
     else
-        echo -e "\nInvalid port: must be 22, or between 1024 and 65535.\n"
+        echo -e "\n${RED}Invalid port: must be 22, or between 1024 and 65535.${NC}\n"
     fi
 else
-	echo -e "Invalid port: must be numeric!\n"
+	echo -e "${RED}Invalid port: must be numeric!${NC}\n"
 fi
