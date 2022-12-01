@@ -47,11 +47,7 @@ play(){
             semanage port -a -t ssh_port_t -p tcp $portbewant
             change_port
         fi
-    elif [[ "${Platform}" =~ ^debian$ ]]; then
-        echo -e "=====> changing port you want <=====\n"
-        echo -e "=====>      please wait       <=====\n"    
-        change_port
-    elif [[ "${Platform}" =~ ^ubuntu$ ]]; then
+    elif [[ "${Platform}" =~ ^debian$|^ubuntu$|^opensuse$ ]]; then
         echo -e "=====> changing port you want <=====\n"
         echo -e "=====>      please wait       <=====\n"    
         change_port
