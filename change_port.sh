@@ -66,7 +66,7 @@ change_port(){
     NOW=$(date +"%m_%d_%Y-%H_%M_%S")
     cp /etc/ssh/sshd_config /etc/ssh/sshd_config.inst.bckup.$NOW
     # Apply changes to sshd_config
-    sed -i -e "s/#Port .*/Port $portbewant/g" /etc/ssh/sshd_config
+    sed -i -e "s/^Port .*/Port $portbewant/g" /etc/ssh/sshd_config
     echo -e "\nRestarting SSH service in 5 seconds. Please wait.\n"
     sleep 5
     # Restart SSH service
