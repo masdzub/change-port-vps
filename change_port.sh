@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# (c) 2022 Dzub
+# (c) 2022 Dzub & Irfan
 
 # Color
 RED='\033[0;31m'
@@ -40,7 +40,7 @@ play(){
             echo -e "\n\n${GREEN}We'll check update on your OS and Install some utilities${NC}\n"
             yum check-update
             yum install policycoreutils-python-utils -y
-            echo -e "=====> changing port you want <=====\n"
+            echo -e "\n=====> changing port you want <=====\n"
             echo -e "=====>      please wait       <=====\n"
             semanage port -a -t ssh_port_t -p tcp $portbewant
             change_port
@@ -50,7 +50,7 @@ play(){
             change_port
         fi
     elif [[ "${Platform}" =~ ^debian$|^ubuntu$|^opensuse-leap$ ]]; then
-        echo -e "=====> changing port you want <=====\n"
+        echo -e "\n=====> changing port you want <=====\n"
         echo -e "=====>      please wait       <=====\n"    
         change_port
     else
@@ -64,14 +64,20 @@ change_port(){
     NOW=$(date +"%m_%d_%Y-%H_%M_%S")
     cp /etc/ssh/sshd_config /etc/ssh/sshd_config.inst.bckup.$NOW
     # Apply changes to sshd_config
-    sed -i -e "s/^#\?PORT .*/Port $portbewant/g" /etc/ssh/sshd_config
+    sed -i -e "s/#Port .*\|Port .*/Port $portbewant/g" /etc/ssh/sshd_config
     echo -e "\nRestarting SSH service in 5 seconds. Please wait.\n"
     sleep 5
     # Restart SSH service
     service sshd restart
     echo ""
     echo -e "${GREEN}The SSH port has been changed to $portbewant.${NC} \n${YELLOW}Please login using that port to test BEFORE ending this session.${NC}\n"
-    exit 1
+    read -p "Do you want to check ssh status [y/n] ?  " sshstatus
+    echo ""
+    if [[ $sshstatus = y ]]; then
+        systemctl status sshd
+    else
+        exit 1
+    fi 
 }
 
 # Ask port and then play it
