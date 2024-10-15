@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# (c) 2022 Dzub & Irfan
+# (c) 2022 Dzub
 
 # Color
 RED='\033[0;31m'
@@ -9,7 +9,7 @@ YELLOW='\033[1;33m'
 PURPLE='\033[0;35m'
 NC='\033[0m' # No Color
 
-# Clearing promt after run this script.
+# Clearing prompt after running this script.
 clear
 printf "${PURPLE}
 #######################################################################
@@ -52,6 +52,12 @@ play(){
     elif [[ "${Platform}" =~ ^debian$|^ubuntu$|^opensuse-leap$ ]]; then
         echo -e "\n=====> changing port you want <=====\n"
         echo -e "=====>      please wait       <=====\n"    
+
+        if [[ "${Platform}" == "ubuntu" && "${VERSION_ID}" -ge 24 ]]; then
+            echo -e "\nDetected Ubuntu 24.04 LTS or later. Applying specific steps.\n"
+            systemctl daemon-reload
+        fi
+
         change_port
     else
         echo -e "\n${RED}Sorry, Script does not support this OS.${NC}"
@@ -68,7 +74,8 @@ change_port(){
     echo -e "\nRestarting SSH service in 5 seconds. Please wait.\n"
     sleep 5
     # Restart SSH service
-    service sshd restart
+    systemctl daemon-reload  # Ensure systemd picks up changes
+    systemctl restart sshd
     echo ""
     echo -e "${GREEN}The SSH port has been changed to $portbewant.${NC} \n${YELLOW}Please login using that port to test BEFORE ending this session.${NC}\n"
     read -p "Do you want to check ssh status [y/n] ?  " sshstatus
@@ -90,5 +97,5 @@ if [[ "$portbewant" =~ ^[0-9]{2,5} || "$portbewant" == 22 ]]; then
         echo -e "\n${RED}Invalid port: must be 22, or between 1024 and 65535.${NC}\n"
     fi
 else
-	echo -e "${RED}Invalid port: must be numeric!${NC}\n"
+    echo -e "${RED}Invalid port: must be numeric!${NC}\n"
 fi
